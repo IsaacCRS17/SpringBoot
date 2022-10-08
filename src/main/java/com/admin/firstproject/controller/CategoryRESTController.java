@@ -18,8 +18,8 @@ public class CategoryRESTController {
     }
 
     @GetMapping
-    public List<CategoryDTO> list(){
-        return this.categoryService.getList();
+    public List<CategoryDTO> list(@RequestParam(defaultValue = "") String filter){
+        return this.categoryService.getList(filter);
     }
 
     @PostMapping
