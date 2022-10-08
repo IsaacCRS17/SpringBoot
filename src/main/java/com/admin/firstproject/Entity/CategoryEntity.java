@@ -2,8 +2,6 @@ package com.admin.firstproject.Entity;
 
 import com.admin.firstproject.type.CategoryDTO;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -13,7 +11,7 @@ import javax.persistence.*;
 public class CategoryEntity extends AuditoryEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idcategory")
+    @Column(name = "idcategory", unique = true, nullable = false)
     private Integer id;
 
     @Column(name = "tx_code", length = 10)

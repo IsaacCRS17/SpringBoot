@@ -1,6 +1,6 @@
 package com.admin.firstproject.repository;
 
-import com.admin.firstproject.Entity.CategoryEntity;
+import com.admin.firstproject.Entity.GradoEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,21 +10,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<CategoryEntity, Integer> {
-    @Query(value = "select c from CategoryEntity c " +
+public interface GradoRepository extends JpaRepository<GradoEntity, Integer> {
+    @Query(value = "select c from GradoEntity c " +
             "where c.status = :status " +
             "and (c.code like concat('%', :filter, '%') or c.name like concat('%', :filter, '%'))"+
             "order by c.name")
-    Optional<List<CategoryEntity>> findCategories(String status, String filter, Pageable pageable);
+    Optional<List<GradoEntity>> findGrados(String status, String filter, Pageable pageable);
 
-    @Query(value = "select count(c) from CategoryEntity c " +
+    @Query(value = "select count(c) from GradoEntity c " +
             "where c.status = :status " +
             "and (c.code like concat('%', :filter, '%') or c.name like concat('%', :filter, '%'))"+
             "order by c.name")
-    Long findCountCategories(String status, String filter);
-
-    Optional<CategoryEntity> findByUniqueIdentifier(String uniqueIdentifier);
-
-    Optional<CategoryEntity> findByName(String name);
-
+    Long findCountGrados(String status, String filter);
+    Optional<GradoEntity> findByUniqueIdentifier(String uniqueIdentifier);
+    Optional<GradoEntity> findByName(Character name);
 }

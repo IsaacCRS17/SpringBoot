@@ -2,10 +2,14 @@ package com.admin.firstproject.service;
 
 import com.admin.firstproject.Entity.CategoryEntity;
 import com.admin.firstproject.repository.CategoryRepository;
+import com.admin.firstproject.type.ApiResponse;
 import com.admin.firstproject.type.CategoryDTO;
+import com.admin.firstproject.type.Pagination;
 import com.admin.firstproject.util.Code;
 import com.admin.firstproject.util.ConstantsGeneric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,12 +25,20 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<CategoryDTO> getList(String filter){
-        return this.categoryRepository.findCategories(ConstantsGeneric.CREATED_STATUS, filter).orElse(new ArrayList<>()).stream().map(CategoryEntity::getDTO).collect(Collectors.toList());
+    public Pagination<CategoryDTO> getList(String filter, int page, int size){
+        Pagination<CategoryDTO> pagination= new Pagination();
+        pagination.setCountFilter(this.categoryRepository.findCountCategories(ConstantsGeneric.CREATED_STATUS, filter));
+        if (pagination.getCountFilter() > 0) {
+            Pageable pageable= PageRequest.of(page, size);
+            List<CategoryEntity> categoryEntities=this.categoryRepository.findCategories(ConstantsGeneric.CREATED_STATUS, filter, pageable).orElse(new ArrayList<>());
+            pagination.setList(categoryEntities.stream().map(CategoryEntity::getDTO).collect(Collectors.toList()));
+        }
+        pagination.setTotalPages(pagination.processAndGetTotalPages(size));
+        return pagination;
     }
 
-    public void add(CategoryDTO categoryDTO){
-        System.out.println(categoryDTO.toString());
+    public ApiResponse<CategoryDTO> add(CategoryDTO categoryDTO){
+        ApiResponse<CategoryDTO> apiResponse = new ApiResponse<>();
         categoryDTO.setId(UUID.randomUUID().toString());
         categoryDTO.setCode(Code.generateCode(Code.CATEGORY_CODE, this.categoryRepository.count() + 1, Code.CATEGORY_LENGTH));
         categoryDTO.setStatus(ConstantsGeneric.CREATED_STATUS);
@@ -34,18 +46,24 @@ public class CategoryService {
 
         Optional<CategoryEntity> optionalCategoryEntity = this.categoryRepository.findByName(categoryDTO.getName());
         if (optionalCategoryEntity.isPresent()) {
-            System.out.println("No se resgistró, la categoría existe");
-            return;
+            apiResponse.setSuccessful(false);
+            apiResponse.setCode("CATEGORY_EXISTS");
+            apiResponse.setMessage("No se resgistró, la categoría existe");
+            return apiResponse;
         }
 
 
         //change DTO to entity
         CategoryEntity categoryEntity=new CategoryEntity();
         categoryEntity.setData(categoryDTO);
-        this.categoryRepository.save(categoryEntity);
+        apiResponse.setData(this.categoryRepository.save(categoryEntity).getDTO());
+        apiResponse.setSuccessful(true);
+        apiResponse.setMessage("ok");
+        return apiResponse;
     }
 
-    public void update(CategoryDTO categoryDTO){
+    public ApiResponse<CategoryDTO> update(CategoryDTO categoryDTO){
+        ApiResponse<CategoryDTO> apiResponse = new ApiResponse<>();
 
         Optional<CategoryEntity> optionalCategoryEntity=this.categoryRepository.findByUniqueIdentifier(categoryDTO.getId());
         if(optionalCategoryEntity.isPresent()){
@@ -60,10 +78,16 @@ public class CategoryService {
             }
             categoryEntity.setUpdateAt(categoryDTO.getUpdateAt());
             //Update in database
-            this.categoryRepository.save(categoryEntity);
+            apiResponse.setSuccessful(true);
+            apiResponse.setMessage("ok");
+            apiResponse.setData(this.categoryRepository.save(categoryEntity).getDTO());
+            return apiResponse;
         }else{
-            System.out.println("No existe la categoría para poder actualizar");
+            apiResponse.setSuccessful(false);
+            apiResponse.setCode("CATEGORY_DOES_NOT_EXISTS");
+            apiResponse.setMessage("No existe la categoría para poder actualizar");
         }
+        return apiResponse;
     }
     //id dto=uniqueIdentifier Entity
     public void delete(String id){

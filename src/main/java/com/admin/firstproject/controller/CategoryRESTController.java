@@ -1,12 +1,11 @@
 package com.admin.firstproject.controller;
 
-import com.admin.firstproject.Entity.CategoryEntity;
 import com.admin.firstproject.service.CategoryService;
+import com.admin.firstproject.type.ApiResponse;
 import com.admin.firstproject.type.CategoryDTO;
+import com.admin.firstproject.type.Pagination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/category")
@@ -16,22 +15,24 @@ public class CategoryRESTController {
     private CategoryService categoryService;
     public CategoryRESTController() {
     }
-
     @GetMapping
-    public List<CategoryDTO> list(@RequestParam(defaultValue = "") String filter){
-        return this.categoryService.getList(filter);
+    public Pagination<CategoryDTO> list(
+            @RequestParam(defaultValue = "") String filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+        return this.categoryService.getList(filter, page, size);
     }
-
     @PostMapping
-    public void add(@RequestBody CategoryDTO categoryDTO){
-        this.categoryService.add(categoryDTO);
+    public ApiResponse<CategoryDTO> add(@RequestBody CategoryDTO categoryDTO){
+        return this.categoryService.add(categoryDTO);
     }
     @PutMapping
-    public void update(@RequestBody CategoryDTO categoryDTO){
-        this.categoryService.update(categoryDTO);
+    public ApiResponse<CategoryDTO> update(@RequestBody CategoryDTO categoryDTO){
+        return this.categoryService.update(categoryDTO);
     }
     @DeleteMapping("{id}")
     public void delete(@PathVariable String id){
         this.categoryService.delete(id);
     }
+
 }
