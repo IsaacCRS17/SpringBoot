@@ -1,10 +1,12 @@
 package com.admin.firstproject.service;
 
 import com.admin.firstproject.Entity.GradoEntity;
+import com.admin.firstproject.Entity.SeccionEntity;
 import com.admin.firstproject.repository.GradoRepository;
 import com.admin.firstproject.type.ApiResponse;
 import com.admin.firstproject.type.GradoDTO;
 import com.admin.firstproject.type.Pagination;
+import com.admin.firstproject.type.SeccionDTO;
 import com.admin.firstproject.util.Code;
 import com.admin.firstproject.util.ConstantsGeneric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +35,20 @@ public class GradoService {
         pagination.setTotalPages(pagination.processAndGetTotalPages(size));
         return pagination;
     }
-
+    public Pagination<SeccionDTO> getListSections(String id, String filter, int page, int size){
+        Pagination<SeccionDTO> pagination = new Pagination<>();
+        pagination.setCountFilter(this.gradoRepository.findCountSectionsInGrade(id, filter));
+        if(pagination.getCountFilter()>0) {
+            Pageable pageable= PageRequest.of(page, size);
+                List<GradoEntity> gradoEntities=this.gradoRepository.findSectiosInGrade(ConstantsGeneric.CREATED_STATUS, filter, pageable).orElse(new ArrayList<>());
+//            Optional<GradoEntity> optionalGradoEntity = this.gradoRepository.findByUniqueIdentifier(id);
+//            GradoEntity gradoEntity = optionalGradoEntity.get();
+//            Set<SeccionEntity> seccionEntities = gradoEntity.getSecciones();
+//            pagination.setList(seccionEntities.stream().map(SeccionEntity::getSeccionDTO).collect(Collectors.toList()));
+        }
+        pagination.setTotalPages(pagination.processAndGetTotalPages(size));
+        return pagination;
+    }
     public ApiResponse<GradoDTO> add(GradoDTO gradoDTO){
         ApiResponse<GradoDTO> apiResponse = new ApiResponse<>();
         gradoDTO.setId(UUID.randomUUID().toString());
@@ -90,15 +102,22 @@ public class GradoService {
         return apiResponse;
     }
     //id dto=uniqueIdentifier Entity
-    public void delete(String id){
+    public ApiResponse<GradoDTO> delete(String id){
+        ApiResponse<GradoDTO> apiResponse = new ApiResponse<>();
         Optional<GradoEntity> optionalGradoEntity=this.gradoRepository.findByUniqueIdentifier(id);
         if(optionalGradoEntity.isPresent()){
             GradoEntity gradoEntity =optionalGradoEntity.get();
             gradoEntity.setStatus(ConstantsGeneric.DELETED_STATUS);
             gradoEntity.setDeleteAt(LocalDateTime.now());
-            this.gradoRepository.save(gradoEntity);
+
+            apiResponse.setSuccessful(true);
+            apiResponse.setMessage("ok");
+            apiResponse.setData(this.gradoRepository.save(gradoEntity).getGradoDTO());
         } else{
-            System.out.println("No existe el grado para poder eliminar");
+            apiResponse.setSuccessful(false);
+            apiResponse.setCode("GRADE_DOES_NOT_EXISTS");
+            apiResponse.setMessage("No existe el grado para poder eliminar");
         }
+        return apiResponse;
     }
 }

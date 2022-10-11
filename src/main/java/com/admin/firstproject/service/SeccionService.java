@@ -90,15 +90,23 @@ public class SeccionService {
         return apiResponse;
     }
     //id dto=uniqueIdentifier Entity
-    public void delete(String id){
+    public ApiResponse<SeccionDTO> delete(String id){
+        ApiResponse<SeccionDTO> apiResponse = new ApiResponse<>();
+
         Optional<SeccionEntity> optionalSeccionEntity=this.seccionRepository.findByUniqueIdentifier(id);
         if(optionalSeccionEntity.isPresent()){
             SeccionEntity seccionEntity =optionalSeccionEntity.get();
             seccionEntity.setStatus(ConstantsGeneric.DELETED_STATUS);
             seccionEntity.setDeleteAt(LocalDateTime.now());
-            this.seccionRepository.save(seccionEntity);
+
+            apiResponse.setSuccessful(true);
+            apiResponse.setMessage("ok");
+            apiResponse.setData(this.seccionRepository.save(seccionEntity).getSeccionDTO());
         } else{
-            System.out.println("No existe la sección para poder eliminar");
+            apiResponse.setSuccessful(false);
+            apiResponse.setCode("SECTION_DOES_NOT_EXISTS");
+            apiResponse.setMessage("No existe la sección para poder eliminar");
         }
+        return apiResponse;
     }
 }

@@ -22,6 +22,15 @@ public interface GradoRepository extends JpaRepository<GradoEntity, Integer> {
             "and (c.code like concat('%', :filter, '%') or c.name like concat('%', :filter, '%'))"+
             "order by c.name")
     Long findCountGrados(String status, String filter);
+    @Query(value = "select c from SeccionEntity")
+    Optional<List<GradoEntity>> findSectiosInGrade(String status, String filter, Pageable pageable);
+
+
+    @Query(value = "select count(c) from seccionxgrado c " +
+            "where c.id = :id " +
+            "and (c.code like concat('%', :filter, '%') or c.name like concat('%', :filter, '%'))")
+    Long findCountSectionsInGrade(String id, String filter);
+
     Optional<GradoEntity> findByUniqueIdentifier(String uniqueIdentifier);
     Optional<GradoEntity> findByName(Character name);
 }

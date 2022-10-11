@@ -37,8 +37,8 @@ public class SeccionRESTController {
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable String id){
-        this.seccionService.delete(id);
+    public ApiResponse<SeccionDTO> delete(@PathVariable String id){
+        return this.seccionService.delete(id);
     }
 
 }
