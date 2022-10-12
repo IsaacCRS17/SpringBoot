@@ -1,7 +1,6 @@
 package com.admin.firstproject.service;
 
 import com.admin.firstproject.Entity.GradoEntity;
-import com.admin.firstproject.Entity.SeccionEntity;
 import com.admin.firstproject.repository.GradoRepository;
 import com.admin.firstproject.type.ApiResponse;
 import com.admin.firstproject.type.GradoDTO;
@@ -58,7 +57,6 @@ public class GradoService {
             return apiResponse;
         }
 
-
         //change DTO to entity
         GradoEntity gradoEntity =new GradoEntity();
         gradoEntity.setGradoDTO(gradoDTO);
@@ -89,6 +87,7 @@ public class GradoService {
             apiResponse.setData(this.gradoRepository.save(gradoEntity).getGradoDTO());
             return apiResponse;
         }else{
+            log.warn("No se completó la actualización");
             apiResponse.setSuccessful(false);
             apiResponse.setCode("GRADE_DOES_NOT_EXISTS");
             apiResponse.setMessage("No existe el grado para poder actualizar");
@@ -108,6 +107,7 @@ public class GradoService {
             apiResponse.setMessage("ok");
             apiResponse.setData(this.gradoRepository.save(gradoEntity).getGradoDTO());
         } else{
+            log.warn("No se pudo eliminar");
             apiResponse.setSuccessful(false);
             apiResponse.setCode("GRADE_DOES_NOT_EXISTS");
             apiResponse.setMessage("No existe el grado para poder eliminar");

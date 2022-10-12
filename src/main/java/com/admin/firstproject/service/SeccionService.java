@@ -3,10 +3,12 @@ package com.admin.firstproject.service;
 import com.admin.firstproject.Entity.SeccionEntity;
 import com.admin.firstproject.repository.SeccionRepository;
 import com.admin.firstproject.type.ApiResponse;
+import com.admin.firstproject.type.GradoDTO;
 import com.admin.firstproject.type.Pagination;
 import com.admin.firstproject.type.SeccionDTO;
 import com.admin.firstproject.util.Code;
 import com.admin.firstproject.util.ConstantsGeneric;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,13 +21,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 public class SeccionService {
 
     @Autowired
     private SeccionRepository seccionRepository;
 
-    public Pagination<SeccionDTO> getList(String filter, int page, int size){
+    public ApiResponse<Pagination<SeccionDTO>> getList(String filter, int page, int size){
+        log.info("filter page size {} {} {}", filter, page, size);
+        ApiResponse<Pagination<SeccionDTO>> apiResponse = new ApiResponse<>();
         Pagination<SeccionDTO> pagination = new Pagination<>();
         pagination.setCountFilter(this.seccionRepository.findCountSeccion(ConstantsGeneric.CREATED_STATUS, filter));
         if(pagination.getCountFilter()>0){
@@ -34,10 +39,15 @@ public class SeccionService {
             pagination.setList(seccionEntities.stream().map(SeccionEntity::getSeccionDTO).collect(Collectors.toList()));
         }
         pagination.setTotalPages(pagination.processAndGetTotalPages(size));
-        return pagination;
+        apiResponse.setData(pagination);
+        apiResponse.setSuccessful(true);
+        apiResponse.setMessage("ok");
+        return apiResponse;
     }
 
-    public Pagination<SeccionDTO> getListSxG(String id, String filter, int page, int size){
+    public ApiResponse<Pagination<SeccionDTO>> getListSxG(String id, String filter, int page, int size){
+        log.info("id filter page size {} {} {} {}", id, filter, page, size);
+        ApiResponse<Pagination<SeccionDTO>> apiResponse = new ApiResponse<>();
         Pagination<SeccionDTO> pagination = new Pagination<>();
         pagination.setCountFilter(this.seccionRepository.findCountSeccionxGrado(id,ConstantsGeneric.CREATED_STATUS, filter));
         System.out.println(pagination.getCountFilter());
@@ -47,7 +57,10 @@ public class SeccionService {
             pagination.setList(seccionEntities.stream().map(SeccionEntity::getSeccionDTO).collect(Collectors.toList()));
         }
         pagination.setTotalPages(pagination.processAndGetTotalPages(size));
-        return pagination;
+        apiResponse.setData(pagination);
+        apiResponse.setSuccessful(true);
+        apiResponse.setMessage("ok");
+        return apiResponse;
     }
 
     public ApiResponse<SeccionDTO> add(SeccionDTO seccionDTO){
@@ -59,13 +72,12 @@ public class SeccionService {
 
         Optional<SeccionEntity> optionalSeccionEntity = this.seccionRepository.findByName(seccionDTO.getName());
         if (optionalSeccionEntity.isPresent()) {
+            log.warn("No se completo el registro");
             apiResponse.setSuccessful(false);
             apiResponse.setCode("SECTION_EXISTS");
             apiResponse.setMessage("No se resgistró, la sección existe");
             return apiResponse;
         }
-
-
         //change DTO to entity
         SeccionEntity seccionEntity =new SeccionEntity();
         seccionEntity.setSeccionDTO(seccionDTO);
@@ -96,6 +108,7 @@ public class SeccionService {
             apiResponse.setData(this.seccionRepository.save(seccionEntity).getSeccionDTO());
             return apiResponse;
         }else{
+            log.warn("No se completó la actualización");
             apiResponse.setSuccessful(false);
             apiResponse.setCode("SECTION_DOES_NOT_EXISTS");
             apiResponse.setMessage("No existe la sección para poder actualizar");
@@ -116,6 +129,7 @@ public class SeccionService {
             apiResponse.setMessage("ok");
             apiResponse.setData(this.seccionRepository.save(seccionEntity).getSeccionDTO());
         } else{
+            log.warn("No se eliminó el registro");
             apiResponse.setSuccessful(false);
             apiResponse.setCode("SECTION_DOES_NOT_EXISTS");
             apiResponse.setMessage("No existe la sección para poder eliminar");

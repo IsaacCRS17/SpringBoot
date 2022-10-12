@@ -19,7 +19,7 @@ public class SeccionRESTController {
     }
 
     @GetMapping
-    public Pagination<SeccionDTO> list(
+    public ApiResponse<Pagination<SeccionDTO>> list(
             @RequestParam(defaultValue = "") String filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){

@@ -31,7 +31,7 @@ public class GradoRESTController {
     }
 
     @GetMapping("/{id}/secciones")
-    public Pagination<SeccionDTO> listSectxGrad(
+    public ApiResponse<Pagination<SeccionDTO>> listSectxGrad(
             @PathVariable String id,
             @RequestParam(defaultValue = "") String filter,
             @RequestParam(defaultValue = "0") int page,
