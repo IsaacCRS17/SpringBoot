@@ -1,6 +1,7 @@
 package com.admin.firstproject.controller;
 
 import com.admin.firstproject.service.GradoService;
+import com.admin.firstproject.service.SeccionService;
 import com.admin.firstproject.type.ApiResponse;
 import com.admin.firstproject.type.GradoDTO;
 import com.admin.firstproject.type.Pagination;
@@ -15,23 +16,27 @@ public class GradoRESTController {
 
     @Autowired
     private GradoService gradoService;
+    @Autowired
+    private SeccionService seccionService;
 
     public GradoRESTController(){
     }
 
     @GetMapping
-    public Pagination<GradoDTO> list(
+    public ApiResponse<Pagination<GradoDTO>> list(
             @RequestParam(defaultValue = "") String filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         return this.gradoService.getList(filter, page, size);
     }
+
     @GetMapping("/{id}/secciones")
-    public Pagination <SeccionDTO> listSections(@PathVariable String id,
-                                                @RequestParam(defaultValue = "") String filter,
-                                                @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "10") int size){
-        return gradoService.getListSections(id, filter, page, size);
+    public Pagination<SeccionDTO> listSectxGrad(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "") String filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+        return this.seccionService.getListSxG(id, filter, page, size);
     }
 
     @PostMapping

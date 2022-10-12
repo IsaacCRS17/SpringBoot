@@ -2,10 +2,14 @@ package com.admin.firstproject.Entity;
 
 import com.admin.firstproject.type.GradoDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,27 +18,26 @@ import java.util.Set;
 public class GradoEntity extends AuditoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tb_grado_id", unique = true, nullable = false)
+    @Column(name = "id", unique = true, nullable = false)
     private Integer id;
-    @Column(name = "tb_grado_cod", length = 40)
+    @Column(name = "cod", length = 40)
     private String code;
-    @Column(name = "tb_grado_nom")
+    @Column(name = "nom")
     private Character name;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinTable(name = "seccionxgrado",
-            joinColumns = {@JoinColumn(name = "tb_grado_id", referencedColumnName = "tb_grado_id")},
-            inverseJoinColumns = {@JoinColumn(name = "tb_seccion_id", referencedColumnName = "tb_seccion_id")}
+            joinColumns = {@JoinColumn(name = "grado_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "seccion_id", referencedColumnName = "id")}
     )
-    private Set<SeccionEntity> secciones = new HashSet<>();
+    private List<SeccionEntity> secciones = new ArrayList<>();
 
     public GradoDTO getGradoDTO(){
         GradoDTO gradoDTO = new GradoDTO();
         gradoDTO.setId(this.getUniqueIdentifier());
         gradoDTO.setCode(this.code);
         gradoDTO.setName(this.name);
-        gradoDTO.setSecciones(this.secciones);
         gradoDTO.setStatus(this.getStatus());
         gradoDTO.setCreateAt(this.getCreateAt());
         gradoDTO.setUpdateAt(this.getUpdateAt());
@@ -46,7 +49,6 @@ public class GradoEntity extends AuditoryEntity {
         this.setUniqueIdentifier(gradoDTO.getId());
         this.code= gradoDTO.getCode();
         this.name= gradoDTO.getName();
-        this.secciones=gradoDTO.getSecciones();
         this.setStatus(gradoDTO.getStatus());
         this.setCreateAt(gradoDTO.getCreateAt());
         this.setUpdateAt(gradoDTO.getUpdateAt());

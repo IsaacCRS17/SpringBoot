@@ -37,6 +37,19 @@ public class SeccionService {
         return pagination;
     }
 
+    public Pagination<SeccionDTO> getListSxG(String id, String filter, int page, int size){
+        Pagination<SeccionDTO> pagination = new Pagination<>();
+        pagination.setCountFilter(this.seccionRepository.findCountSeccionxGrado(id,ConstantsGeneric.CREATED_STATUS, filter));
+        System.out.println(pagination.getCountFilter());
+        if(pagination.getCountFilter()>0){
+            Pageable pageable= PageRequest.of(page, size);
+            List<SeccionEntity> seccionEntities=this.seccionRepository.findSeccionxGrado(id, ConstantsGeneric.CREATED_STATUS, filter, pageable).orElse(new ArrayList<>());
+            pagination.setList(seccionEntities.stream().map(SeccionEntity::getSeccionDTO).collect(Collectors.toList()));
+        }
+        pagination.setTotalPages(pagination.processAndGetTotalPages(size));
+        return pagination;
+    }
+
     public ApiResponse<SeccionDTO> add(SeccionDTO seccionDTO){
         ApiResponse<SeccionDTO> apiResponse = new ApiResponse<>();
         seccionDTO.setId(UUID.randomUUID().toString());
